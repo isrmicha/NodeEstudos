@@ -24,6 +24,6 @@ var intervalo = setInterval(()=>{
     cont++;
     // process.stdout.clearLine();
     process.stdout.cursorTo(14);
-    process.stdout.write(`\u{1b}[35m ${cont}%\u{1b}[0m`);
+    process.stdout.write(`\u{1b}[35m ${cont}%\u{1b}[0m`); 
     }
 },100);
