@@ -1,29 +1,23 @@
-// var fs = require('fs');
-// var zlib = require('zlib');
-// var gzip = zlib.createGzip({level : 9});
-// var leitura = fs.createReadStream('escrita1.txt');
-// var escrita = fs.createWriteStream('escrita1.txt.gz');
-// leitura.pipe(gzip).pipe(escrita);
 
-// escrita.on('close',(()=>{
-//     var size1 = (fs.statSync('escrita1.txt').size) / 1024,
-//     size2 = (fs.statSync('escrita1.txt.gz').size) / 1024;
-// console.log(`\u{1b}[35m [Compressão]\u{1b}[0m redução de\u{1b}[32m ${((1-((size2/size1)))*100).toFixed(2)}%\u{1b}[0m do tamanho original\u{1b}[31m ${size1}\u{1b}[0m Kb para\u{1b}[31m ${size2.toFixed(2)}\u{1b}[0m Kb`);
+var fs = require('fs');
+var archiver = require('archiver');
+var unzip = require('unzip');
+if(!fs.existsSync('pasta1/')){
+    fs.mkdirSync('pasta1');
+}
+// create a file to stream archive data to.
+var output = fs.createWriteStream(__dirname + '/example.zip');
+var archive = archiver('zip', {
+  zlib: { level: 9 } // Sets the compression level.
+});
+output.on('close', function() {
+    console.log(archive.pointer() + ' total bytes');
+    console.log('archiver has been finalized and the output file descriptor has closed.');
+    fs.createReadStream('example.zip').pipe(unzip.Extract({ path: 'pasta1/' }));
 
-// }))
-var cont = 0;
-process.stdout.write(`[Progressão]: \u{1b}[35m ${cont}%\u{1b}[0m`);
-var intervalo = setInterval(()=>{
-    if(cont==100){
-        clearInterval(intervalo);
-        process.stdout.clearLine();
-        process.stdout.cursorTo(0);
-        process.stdout.write(`\u{1b}[32m [Completo]\u{1b}[0m`);
-    }
-    else{
-    cont++;
-    // process.stdout.clearLine();
-    process.stdout.cursorTo(14);
-    process.stdout.write(`\u{1b}[35m ${cont}%\u{1b}[0m`); 
-    }
-},100);
+});
+  archive.append('escrita1.txt', { name: 'file1.txt' });
+  archive.append('escrita2.txt', { name: 'file2.txt' });
+  archive.pipe(output);
+  archive.finalize();
+
